@@ -1,4 +1,4 @@
-# dmenu-scripts
+# My dmenu-scripts
 
 ## Credits:
 - Audio Output
