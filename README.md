@@ -7,11 +7,9 @@
 - Define
 https://github.com/BreadOnPenguins/scripts
 
-Bluetooth
-
+- Bluetooth
 https://github.com/nickclyde/rofi-bluetooth
 
 
-WiFi Menu
-
+- WiFi Menu
 https://github.com/e-tho/iwmenu
