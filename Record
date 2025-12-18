@@ -25,6 +25,7 @@ case "$CHOICE" in
         read -r W H X Y < <(get_geometry)
         [ -z "$W" ] && exit 1
 
+        # Record Desktop (no audio)
         timeout "$MAX_TIME" ffmpeg -f x11grab -video_size "${W}x${H}" -i ":0.0+${X},${Y}" \
             -c:v libx264 -preset ultrafast -pix_fmt yuv420p -an \
             "$REC_DIR/Area-NoMic-$TIMESTAMP.mp4" &
