@@ -1,0 +1,13 @@
+#!/bin/bash
+SCRIPT_DIR="$HOME/scripts"
+
+if [ ! -d "$SCRIPT_DIR" ]; then
+    notify-send "Error" "Script directory $SCRIPT_DIR not found."
+    exit 1
+fi
+
+selected=$(find "$SCRIPT_DIR" -maxdepth 1 -type f -executable -printf "%f\n" | sort | dmenu -i -l 20 -p "Run Script:")
+
+if [ -n "$selected" ]; then
+    "$SCRIPT_DIR/$selected"
+fi

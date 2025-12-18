@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Define the storage directory
+REC_DIR="$HOME/Videos/Recordings"
+mkdir -p "$REC_DIR"
+MAX_TIME="1200"
+
+# File naming based on date
+TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+
+# Function to get screen area using slop
+get_geometry() {
+    slop -f "%w %h %x %y"
+}
+
+# Options for dmenu
+OPTIONS="1. Record Area\n2. Record Area (With Mic)\n3. Record Audio\n4. Stop Recording"
+
+# Launch dmenu
+CHOICE=$(echo -e "$OPTIONS" | dmenu -i -p "Recording Studio:")
+
+case "$CHOICE" in
+    "1. Record Area")
+        # Get selection
+        read -r W H X Y < <(get_geometry)
+        [ -z "$W" ] && exit 1
+        
+        # Capture Desktop Audio (Monitor) - Ensure 'default' is set to Monitor in PulseAudio
+        timeout "$MAX_TIME" ffmpeg -f x11grab -video_size "${W}x${H}" -i ":0.0+${X},${Y}" \
+            -c:v libx264 -preset ultrafast -pix_fmt yuv420p -an \
+            "$REC_DIR/Area-NoMic-$TIMESTAMP.mp4" &
+        ;;
+
+    "2. Record Area (With Mic)")
+        # Get selection
+        read -r W H X Y < <(get_geometry)
+        [ -z "$W" ] && exit 1
+
+        # To record Mic, you usually target the specific pulse source or default input
+        timeout "$MAX_TIME" ffmpeg -f x11grab -video_size "${W}x${H}" -i ":0.0+${X},${Y}" \
+            -f pulse -i default -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
+            -c:a aac -b:a 128k "$REC_DIR/Area-Mic-$TIMESTAMP.mp4" &
+        ;;
+
+    "3. Record Audio")
+        timeout "$MAX_TIME" ffmpeg -f pulse -i default -c:a libopus -b:a 128k "$REC_DIR/Audio/Audio-$TIMESTAMP.ogg" &
+        ;;
+
+    "4. Stop Recording")
+        pkill ffmpeg
+        notify-send "Recording Stopped" "File saved to $REC_DIR"
+        exit 0
+        ;;
+    *)
+        exit 1
+        ;;
+esac
+
+# Notify user that recording started
+if [ $? -eq 0 ]; then
+    notify-send "Recording Started" "Recording area ${W}x${H} at ${X},${Y}"
+fi

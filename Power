@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Define the options
+options="Lock\nReboot\nPower Off"
+
+# Launch dmenu for the initial selection
+selected=$(echo "$options" | dmenu -i -p "System:")
+
+# Function to handle confirmation
+confirm() {
+    echo "No\nYes" | dmenu -i -p "Are you sure? ($1)"
+}
+
+case "$selected" in
+    Lock)
+        slock
+        ;;
+    Reboot)
+        confirmation=$(confirm "reboot")
+        if [ "$confirmation" = "Yes" ]; then
+            loginctl reboot
+        fi
+        ;;
+    "Power Off")
+        confirmation=$(confirm "power off")
+        if [ "$confirmation" = "Yes" ]; then
+            loginctl poweroff
+        fi
+        ;;
+    *)
+        exit 0
+        ;;
+esac

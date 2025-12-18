@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Configuration ---
+SCREENSHOT_DIR="${HOME}/Pictures/Screenshots"
+FILENAME="Screenshot-$(date +%Y-%m-%d-%H:%M:%S).png"
+FILE_PATH="$SCREENSHOT_DIR/$FILENAME"
+# --- End Configuration ---
+
+# 1. Dependencies check
+for cmd in maim xclip dunstify nsxiv; do 
+    command -v "$cmd" &>/dev/null || { echo "Missing: $cmd" >&2; exit 1; }
+done
+
+# 2. Ensure the output directory exists
+mkdir -p "$SCREENSHOT_DIR"
+
+# 3. Take Screenshot
+if maim -s -u | tee "$FILE_PATH" | xclip -selection clipboard -t image/png; then
+    ACTION=$(dunstify \
+        -i "$FILE_PATH" \
+        -A "view,View in nsxiv" \
+        "Screenshot Taken" \
+        "Saved to: $FILENAME")
+
+    if [[ "$ACTION" == "view" ]]; then
+        nsxiv "$FILE_PATH"
+    fi
+else
+    dunstify -u low "Screenshot Canceled" "No region selected."
+fi
