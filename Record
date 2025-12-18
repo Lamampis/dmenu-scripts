@@ -24,8 +24,7 @@ case "$CHOICE" in
         # Get selection
         read -r W H X Y < <(get_geometry)
         [ -z "$W" ] && exit 1
-        
-        # Capture Desktop Audio (Monitor) - Ensure 'default' is set to Monitor in PulseAudio
+
         timeout "$MAX_TIME" ffmpeg -f x11grab -video_size "${W}x${H}" -i ":0.0+${X},${Y}" \
             -c:v libx264 -preset ultrafast -pix_fmt yuv420p -an \
             "$REC_DIR/Area-NoMic-$TIMESTAMP.mp4" &
@@ -36,7 +35,6 @@ case "$CHOICE" in
         read -r W H X Y < <(get_geometry)
         [ -z "$W" ] && exit 1
 
-        # To record Mic, you usually target the specific pulse source or default input
         timeout "$MAX_TIME" ffmpeg -f x11grab -video_size "${W}x${H}" -i ":0.0+${X},${Y}" \
             -f pulse -i default -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
             -c:a aac -b:a 128k "$REC_DIR/Area-Mic-$TIMESTAMP.mp4" &
