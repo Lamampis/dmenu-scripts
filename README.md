@@ -5,7 +5,7 @@
 - Color Picker
 - Screenshot
 - Define
-- https://github.com/BreadOnPenguins/scripts
+https://github.com/BreadOnPenguins/scripts
 
 Bluetooth
 
