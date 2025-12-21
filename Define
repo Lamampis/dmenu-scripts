@@ -36,7 +36,7 @@ notify-send -t 10000 "$word -" "$def"
 # Regex + grep for just definition, if anyone prefers that to jq
 # def=$(grep -Po '"definition":"\K(.*?)(?=")' <<< "$query")
 
-# bold=$(tput bold) # Print text bold with echo, for visual clarity
+bold=$(tput bold) # Print text bold with echo, for visual clarity
 # normal=$(tput sgr0) # Reset text to normal
 # echo "${bold}Definition of $word"
 # echo "${normal}$def"
