@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# 1. Choose Action (Audio, Video, or Stop)
+type_choice=$(echo -e "Audio\nVideo\nStop Downloads" | dmenu -p "Action:")
+[ -z "$type_choice" ] && exit 1
+
+# 2. Handle the "Stop" Logic
+if [ "$type_choice" == "Stop Downloads" ]; then
+    if pkill yt-dlp; then
+        notify-send "yt-dlp" "All downloads have been stopped."
+    else
+        notify-send "yt-dlp" "No active downloads found."
+    fi
+    exit 0
+fi
+
+# 3. Set Base Directory and yt-dlp Flags based on choice
+if [ "$type_choice" == "Audio" ]; then
+    base_dir="$HOME/Music"
+    dl_props="-f 'ba[ext=m4a]' --add-metadata --embed-thumbnail"
+else
+    base_dir="$HOME/Videos"
+    dl_props="-f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' --add-metadata --embed-thumbnail"
+fi
+
+mkdir -p "$base_dir"
+
+# 4. Get the Sub-Directory Choice
+existing_dirs=$(find "$base_dir" -maxdepth 1 -type d -printf '%P\n' | grep -v '^$' | sort)
+list_options=$(echo -e "Downloads\n$existing_dirs" | uniq)
+
+selected_sub=$(echo -e "$list_options" | dmenu -p "$type_choice Folder:")
+[ -z "$selected_sub" ] && exit 1
+
+save_path="$base_dir/$selected_sub"
+mkdir -p "$save_path"
+
+# 5. Get the URL
+clipboard_url=$(xclip -selection clipboard -o 2>/dev/null)
+url=$(echo "$clipboard_url" | dmenu -p "URL:")
+[ -z "$url" ] && exit 1
+
+# 6. Execution
+notify-send "yt-dlp" "Starting $type_choice download..."
+
+if eval yt-dlp "$dl_props" -o "'$save_path/%(title)s.%(ext)s'" "$url"; then
+    notify-send "yt-dlp" "Finished: $(basename "$url")"
+else
+    # Check if it was manually killed or failed for other reasons
+    if ! pgrep -x "yt-dlp" > /dev/null; then
+        notify-send "yt-dlp" "Download Canceled."
+    else
+        notify-send "yt-dlp" "Error: Download failed."
+    fi
+fi
